@@ -6,14 +6,23 @@ function randColor() {
   var c = Math.round(0xFFFFFF * Math.random()).toString(16);
   var missing = 6 - c.length;
   
-  return ("#" + Array(missing).join("0") + c);
+  return ("#" + Array(missing + 1).join("0") + c);
+}
+
+function randGrey() {
+  var c = Math.round(0xFF * Math.random()).toString(16);
+  var missing = 2 - c.length;
+  console.log(missing);
+  var single = Array(missing + 1).join("0") + c;
+
+  return ("#" + Array(4).join(single));
 }
 
 var transmission = (function () {
   var width = $(window).width(),
       height = $(window).height(),
-      radius = 20,
-      drawMargin = radius + 5,
+      maxRadius = 100,
+      drawMargin = maxRadius + 5,
       rootId = 'transmission',
       signalCount = 5
   ;
@@ -23,7 +32,7 @@ var transmission = (function () {
     signalCount: signalCount,
     width: width,
     height: height,
-    radius: radius,
+    maxRadius: maxRadius,
     derived: {
       minX: drawMargin,
       maxX: width - drawMargin,
@@ -39,15 +48,17 @@ var signals = d3.range(transmission.signalCount).map(function (e) {
           transmission.derived.maxX),
       y = (Math.random() * transmission.height).clamp(
           transmission.derived.minY,
-          transmission.derived.maxY);
+          transmission.derived.maxY),
+      strength = Math.random() * transmission.maxRadius;
+
   return {
-    color: randColor(),
+    color: randGrey(),
     cx: x,
     cy: y,
-    rx: transmission.radius,
-    ry: transmission.radius,
+    rx: strength,
+    ry: strength,
   }
-});
+}).sort(function (a,b) { return (b.rx - a.rx); });
 
 var svg = d3.select('#transmission')
   .append('svg')
