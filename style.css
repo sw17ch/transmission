@@ -4,3 +4,8 @@ body {
   padding: 0px;
   margin: 0px;
 }
+
+ellipse.highlight {
+  fill:#CC0000;
+  fill-opacity: 0;
+}

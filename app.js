@@ -18,6 +18,27 @@ function randGrey() {
   return ("#" + Array(4).join(single));
 }
 
+function toggleHighlight() {
+  var highlights = d3.selectAll('ellipse.highlight');
+  if (highlights.classed('highlighted')) {
+    highlights
+      .classed('highlighted', false)
+      .interrupt()
+      .transition()
+        .duration(1500)
+        .style('fill-opacity', 0)
+        ;
+  } else {
+    highlights
+      .classed('highlighted', true)
+      .interrupt()
+      .transition()
+        .duration(1500)
+        .style('fill-opacity', 1)
+        ;
+  }
+}
+
 var transmission = (function () {
   var width = $(window).width(),
       height = $(window).height(),
@@ -69,28 +90,29 @@ var defs = svg.append('defs');
 defs.append('filter')
       .attr('id', 'blur')
     .append('feGaussianBlur')
-      .attr('stdDeviation', 2);
-defs.append('filter')
-      .attr('id', 'noise')
-    .append('feTurbulence')
-      .attr('type', 'fractalNoise')
-      .attr('baseFrequency', 0.05);
-
-var circles = svg
-  .append('g')
-    .attr('id', 'circles')
-    .attr('filter', 'url(#noise)');
+      .attr('stdDeviation', 1);
 
 var g = svg.selectAll('g.signal')
   .data(signals)
   .enter().append('g')
-            .classed('signal', '')
-          .append('ellipse')
-            .style('fill', function (sig) { return sig.color; })
-            .attr('rx', function (sig) { return sig.rx; })
-            .attr('ry', function (sig) { return sig.ry; })
-            .attr('cx', function (sig) { return sig.cx; })
-            .attr('cy', function (sig) { return sig.cy; })
-            .attr('filter', 'url(#blur)');
+            .classed('signal', true);
+
+g.insert('ellipse')
+  .classed('highlight', true)
+  .attr('rx', function (sig) { return sig.rx + 15; })
+  .attr('ry', function (sig) { return sig.ry + 15; })
+  .attr('cx', function (sig) { return sig.cx; })
+  .attr('cy', function (sig) { return sig.cy; })
+  .attr('filter', 'url(#blur)')
+  ;
+g.insert('ellipse')
+  .classed('signal-ellipse', true)
+  .style('fill', function (sig) { return sig.color; })
+  .attr('rx', function (sig) { return sig.rx; })
+  .attr('ry', function (sig) { return sig.ry; })
+  .attr('cx', function (sig) { return sig.cx; })
+  .attr('cy', function (sig) { return sig.cy; })
+  .attr('filter', 'url(#blur)')
+  ;
 
 console.log(g);
