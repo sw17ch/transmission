@@ -18,25 +18,20 @@ function randGrey() {
   return ("#" + Array(4).join(single));
 }
 
-function toggleHighlight() {
-  var highlights = d3.selectAll('ellipse.highlight');
-  if (highlights.classed('highlighted')) {
-    highlights
-      .classed('highlighted', false)
+function performHighlight() {
+  var highlights = d3.selectAll('circle.signal-circle');
+
+  highlights.each(function (d,i) {
+    d3.select(this)
       .interrupt()
       .transition()
-        .duration(1500)
-        .style('fill-opacity', 0)
-        ;
-  } else {
-    highlights
-      .classed('highlighted', true)
-      .interrupt()
+      .duration(500)
+      .style('fill', '#FF0000')
       .transition()
-        .duration(1500)
-        .style('fill-opacity', 1)
-        ;
-  }
+      .duration(500)
+      .style('fill', d.color)
+      ;
+  });
 }
 
 var transmission = (function () {
@@ -66,25 +61,27 @@ var transmission = (function () {
 var signals = d3.range(transmission.signalCount).map(function (e) {
   var x = (Math.random() * transmission.width).clamp(
           transmission.derived.minX,
-          transmission.derived.maxX),
-      y = (Math.random() * transmission.height).clamp(
+          transmission.derived.maxX);
+  var y = (Math.random() * transmission.height).clamp(
           transmission.derived.minY,
-          transmission.derived.maxY),
-      strength = Math.random() * transmission.maxRadius;
+          transmission.derived.maxY);
+  var strength = Math.random() * transmission.maxRadius;
 
   return {
     color: randGrey(),
     cx: x,
     cy: y,
-    rx: strength,
-    ry: strength,
+    r: strength,
   }
-}).sort(function (a,b) { return (b.rx - a.rx); });
+}).sort(function (a,b) { return (b.cx - a.cx); });
 
 var svg = d3.select('#transmission')
   .append('svg')
     .attr('width', transmission.width)
-    .attr('height', transmission.height);
+    .attr('height', transmission.height)
+  .on('click', function () {
+    performHighlight();
+  });
 var defs = svg.append('defs');
 
 defs.append('filter')
@@ -97,19 +94,10 @@ var g = svg.selectAll('g.signal')
   .enter().append('g')
             .classed('signal', true);
 
-g.insert('ellipse')
-  .classed('highlight', true)
-  .attr('rx', function (sig) { return sig.rx + 15; })
-  .attr('ry', function (sig) { return sig.ry + 15; })
-  .attr('cx', function (sig) { return sig.cx; })
-  .attr('cy', function (sig) { return sig.cy; })
-  .attr('filter', 'url(#blur)')
-  ;
-g.insert('ellipse')
-  .classed('signal-ellipse', true)
+g.insert('circle')
+  .classed('signal-circle', true)
   .style('fill', function (sig) { return sig.color; })
-  .attr('rx', function (sig) { return sig.rx; })
-  .attr('ry', function (sig) { return sig.ry; })
+  .attr('r', function (sig) { return sig.r; })
   .attr('cx', function (sig) { return sig.cx; })
   .attr('cy', function (sig) { return sig.cy; })
   .attr('filter', 'url(#blur)')
